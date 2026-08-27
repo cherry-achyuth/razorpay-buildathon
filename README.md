@@ -1,208 +1,175 @@
 # DecisionVault
+> **AI Financial Safety Guard for Autonomous Commerce**
 
-> **Decision-Preserving Financial Memory for Autonomous Agents**
+DecisionVault is a financial memory middleware that sits between autonomous AI buying agents and Razorpay payment execution. Before any payment runs, it reads the user's spending history, compresses it into smart memories, and runs deterministic safety rules. The AI never touches money directly — every payment is gated, explainable, and auditable.
 
-DecisionVault is an industry-first, security-first middleware layer that sits between autonomous AI buying agents and payment/mandate execution gateways. It ensures that every proposed financial action is rigorously evaluated against historical context, decision provenance, and deterministic financial guardrails before funds can ever be authorized or debited.
-
----
-
-## 1. Project Overview & Buildathon Scope
-
-**DecisionVault** is a financial decision memory middleware and payment security gateway built for the **Razorpay AI Buildathon**.
-
-It provides an authoritative execution gate for autonomous AI commerce agents:
-1. **Financial Memory & Provenance**: Raw transaction history in PostgreSQL is authoritative. Decision memories represent compact, explainable historical context with explicit provenance.
-2. **Deterministic Financial Guardrails**: LLMs and AI agents **never** authorize money movement directly. All payment proposals are evaluated by deterministic code against mandate constraints, spending policies, duplicate detection, idempotency, and price drift thresholds.
-3. **Deterministic Decisions**:
-   - `ALLOW`: Permitted action satisfying all safety guardrails $\rightarrow$ unlocks Razorpay Test Mode payment execution.
-   - `ASK_USER`: Ambiguous action or price drift anomaly $\rightarrow$ halts execution until explicit user confirmation.
-   - `BLOCK`: Policy breach or replay attack $\rightarrow$ halts execution with zero funds debited.
-4. **Razorpay Test Mode Integration**: Full test mode payment gateway integration (`POST /api/v1/payments/execute` and `POST /api/v1/payments/decisions/{id}/confirm`).
-5. **Tamper-Evident SHA-256 Audit Log**: Append-only linear cryptographic audit chain recording all evaluations, compressions, and payment attempts.
-6. **Decision-Preservation Benchmarking**: Dual-path evaluation comparing full history against compressed memory across adversarial boundaries.
-7. **Interactive 5-Minute Demo Web Dashboard**: High-clarity dashboard served directly at `http://localhost:8000/` and `/demo`.
-
-**What is implemented:**
-- **Payment Gateway & Gate**: `PaymentExecutionService`, `RazorpayTestClient`, `POST /api/v1/payments/execute`, `POST /api/v1/payments/decisions/{decision_id}/confirm`, `GET /api/v1/payments/status`.
-- **Interactive Web UI**: Fast, responsive dashboard at `/` and `/demo` with Decision Console, Memory & Provenance Inspector, Tamper-Evident Audit Viewer, Benchmark Runner, and 1-Click Scenario Launcher.
-- **Evaluation Subsystem**: `DecisionPreservationService`, `FullHistoryBaselineEvaluator`, `CompressedMemoryEvaluator`, `ScenarioFactory` (Standard & Adversarial suites), `metrics.py`, and `experiments/synthetic/`.
-- **Audit Subsystem**: Linear SHA-256 hash-chained log with `GET /api/v1/audit/verify` and `GET /api/v1/audit`.
-- **Memory API Endpoints**: Memory building, semantic & hybrid vector retrieval, compression, and retirement.
-- **Guardrails Pipeline**: 6 deterministic rules (`MandateConstraintRule`, `PolicyLimitRule`, `DuplicatePaymentRule`, `IdempotencyRule`, `PriceDriftRule`, `MerchantChangeRule`).
-- **Comprehensive Testing Suite**: **183 automated tests passing in 22s** with 0 Ruff lint/format errors.
-
-**Important Architectural Invariants:**
-- ❌ **LLMs NEVER Authorize Money Movement**: Deterministic code and user confirmation remain the sole security boundaries.
-- ❌ **Raw Transactions Are Never Deleted**: Compression consolidates derived memory without destroying authoritative PostgreSQL transaction ledgers.
-- ❌ **No Blockchain / Kafka / ChromaDB Overhead**: PostgreSQL and pgvector provide full relational integrity and vector search without duplicate infrastructure.
+Built for the **Razorpay AI Buildathon**.
 
 ---
 
-## 2. Architecture & Decision Flow
+## How It Works
 
-```text
-           AUTONOMOUS AI BUYING AGENT
-                      │
-                      │ 1. Natural Language Purchase Request
-                      ▼
-        ┌─────────────────────────────┐
-        │ Multi-Tier Intent Parser    │
-        │ - Gemini / OpenAI / Semantic│
-        │ - Entity & Currency Match   │
-        └──────────────┬──────────────┘
-                       │
-                       │ 2. POST /api/v1/decisions/evaluate
-                       ▼
-               DecisionVault API
-                       │
-                       ▼
-           [ProposedFinancialAction]
-                       │
-                       ▼
-        ┌─────────────────────────────┐
-        │  Retrieve Decision Memories │
-        │  - Scoped to user_id        │
-        │  - Status ACTIVE            │
-        │  - SQL Temporal Filter      │
-        │  - Relevance Priority Order │
-        │  - Bounded (Limit 10)       │
-        └──────────────┬──────────────┘
-                       │
-                       ▼
-    [Load Authoritative State from PostgreSQL]
-         (User, Merchant, Mandate, Policy,
-     Recent Transactions, Idempotency Record)
+```
+User types: "Pay my usual Netflix subscription"
                       │
                       ▼
-        ┌─────────────────────────────┐
-        │  Deterministic Rule Engine  │
-        │  - MandateConstraintRule    │
-        │  - PolicyLimitRule          │
-        │  - DuplicatePaymentRule     │
-        │  - IdempotencyRule          │
-        │  - PriceDriftRule           │
-        │  - MerchantChangeRule       │
-        └──────────────┬──────────────┘
-                       │
-                       ▼
-        ┌─────────────────────────────┐
-        │ Decision & Cryptographic Log│
-        │ - Record SHA-256 Hash Chain │
-        └──────────────┬──────────────┘
-                       │
-        ┌──────────────┴──────────────┐
-        ▼              ▼              ▼
-     [ALLOW]       [ASK_USER]      [BLOCK]
-        │              │              │
-        │        (Pause for User)     │
-        ▼              │              ▼
-  ┌───────────┐        │        [Zero Debits]
-  │ Razorpay  │        │        [Hard Stop]
-  │ Test Mode │◄───────┘
-  │  Payment  │ (On User Confirm)
-  └───────────┘
+         ┌─────────────────────────┐
+         │  Gemini AI parses intent│  → Merchant: Netflix, Amount: ₹649
+         └────────────┬────────────┘
+                      │
+                      ▼
+         ┌─────────────────────────┐
+         │  DecisionVault Guardrails│  → Checks history, policies, drift
+         │  - Price Drift Rule      │
+         │  - Policy Limit Rule     │
+         │  - Duplicate Detection   │
+         │  - New Merchant Guard    │
+         └────────────┬────────────┘
+                      │
+          ┌───────────┼───────────┐
+          ▼           ▼           ▼
+       ALLOW       ASK_USER     BLOCK
+          │           │           │
+    Razorpay     Pause for    Zero money
+    Test Mode    user confirm  movement
+    executes
 ```
 
 ---
 
-## 3. Core Demonstration Scenarios
+## 5 Core Demo Scenarios
 
-| # | Scenario | Proposed Action | History / Policy Context | DecisionVault Evaluation | Gateway Execution |
-|---|---|---|---|---|---|
-| **1** | **Routine Purchase** | ₹25.00 to CloudCompute | Standard monthly bill; ₹100 policy limit | **`ALLOW`** | Payment executed via Razorpay Test Mode |
-| **2** | **Duplicate Replay Attack** | ₹25.00 to CloudCompute | Identical payment executed 0s ago | **`BLOCK`** (`DUPLICATE_PAYMENT_DETECTED`) | Zero money movement |
-| **3** | **Policy Limit Violation** | ₹150.00 to CloudCompute | Policy max per transaction is ₹100.00 | **`BLOCK`** (`POLICY_TRANSACTION_LIMIT_EXCEEDED`) | Zero money movement |
-| **4** | **Price Drift (+160%)** | ₹65.00 to CloudCompute | Historical median baseline is ₹25.00 | **`ASK_USER`** (`PRICE_DRIFT_DETECTED`) | Halted; unlocks only upon explicit user confirmation |
-| **5** | **Memory Compression** | 90-day history | 8 raw transactions consolidated | **4.00x Compression Ratio** | Raw PostgreSQL ledgers intact; derived memory updated |
-| **6** | **Audit Chain Integrity** | SHA-256 validation | Linear cryptographic hash sequence | **`VALID` (Unbroken Chain)** | Cryptographically verified |
-| **7** | **Decision Preservation** | 5 benchmark cases | Full History vs Compressed Memory | **100.0% Preservation Rate** | 0 False ALLOWs (Zero safety bypasses) |
-| **8** | **AI Buying Agent NLP** | Natural language prompt | "Pay my usual 25 INR subscription" | **`ALLOW`** (Intent parsed & gated) | Autonomous payment executed |
+| # | Try This Prompt | Decision | What It Proves |
+|---|---|---|---|
+| 1 | `"Pay my usual Netflix subscription"` | ✅ **ALLOW** ₹649 | Memory baseline: resolves amount from history automatically |
+| 2 | `"Pay 1500 INR to Netflix"` | ⚠️ **ASK_USER** | Price drift: ₹1,500 is 131% above the ₹649 baseline |
+| 3 | `"Order food from Swiggy Instamart"` | ⚠️ **ASK_USER** | New merchant guard: first-time counterparty always requires confirmation |
+| 4 | `"Compare Netflix vs Amazon Prime for a year"` | 📊 **Comparison Table** | AI intelligence: structured cost comparison without executing any payment |
+| 5 | `"Pay 5000 INR to Unknown Shady Mart"` | 🚫 **BLOCK** | Hard cap: exceeds ₹3,000 ceiling + unverified merchant |
 
 ---
 
-## 4. Local Setup & Installation
+## Merchant Baselines (Seeded with Real Published Prices)
+
+| Merchant | Plan | Monthly | Baseline Used |
+|---|---|---|---|
+| Netflix | Premium 4K (India) | ₹649 | ₹649/month |
+| Amazon Prime | Monthly subscription | ₹299 | ₹299/month |
+| Spotify | Premium Individual | ₹119 | ₹119/month |
+| CloudCompute Global | Standard 2vCPU VPS | ₹850 | ₹850/month |
+| BigBasket | bbdaily grocery basket | ₹350 | ₹350/order |
+| Unknown Shady Mart | — | — | No history (always ASK_USER) |
+
+New merchants typed by the user (e.g. "Swiggy Instamart") are auto-created, quality-validated, and flagged for first-purchase confirmation. After a confirmed payment, memory is built automatically.
+
+---
+
+## Key Features
+
+- **AI-Powered Intent Parsing** — Gemini Flash reads natural language and extracts merchant, amount, currency. Falls back to deterministic parser if AI is unavailable.
+- **Financial Memory** — 21 raw transactions compressed into 5 semantic memories. Raw ledger always intact.
+- **Deterministic Guardrails** — 6 rules run on every payment proposal. LLMs have zero authority over money movement.
+- **Price Drift Detection** — Flags payments more than 25% above the user's historical median. Fires ASK_USER with specific numbers.
+- **New Merchant Safety** — Auto-creates merchants from AI extraction with quality validation (max 4 words, min 3 alpha chars). First payment always requires human confirmation.
+- **Anti-Ratcheting** — Confirmed price baseline updates are subject to a 7-day cooldown window to prevent gradual manipulation.
+- **Tamper-Evident Audit Chain** — Every decision, payment, and memory event is SHA-256 hash-chained and cryptographically verifiable.
+- **Comparison Queries** — Ask "compare X vs Y" and get a structured cost table. No payment executed.
+- **Razorpay Test Mode** — Real gateway integration. ALLOW decisions execute via Razorpay sandbox.
+
+---
+
+## Quick Start
 
 ### Prerequisites
-- Python 3.12 or higher
-- `uv` package manager installed (`curl -LsSf https://astral.sh/uv/install.sh | sh` or `winget install astral-sh.uv`)
+- Python 3.12+
+- [`uv`](https://github.com/astral-sh/uv) package manager
 
-### Step 1: Clone and Synchronize Dependencies
+### Setup
 ```bash
+# 1. Install dependencies
 uv sync --all-extras
-```
 
-### Step 2: Configure Environment
-Copy `.env.example` to `.env`:
-```bash
+# 2. Configure environment
 cp .env.example .env
-```
+# Add your GEMINI_API_KEY and RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET to .env
 
-### Step 3: Run Database Migrations
-```bash
+# 3. Run database migrations
 uv run alembic upgrade head
+
+# 4. Start the server
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Step 4: Run Tests & Verification
-```bash
-uv run pytest -v
-uv run ruff check .
-uv run ruff format --check .
-```
+Open **http://localhost:8000/** in your browser.
 
-### Step 5: Seed 30-Day Demo Data (Optional CLI)
+### Seed Demo Data
+Click **"⚡ Seed Demo Data"** in the UI, or run:
 ```bash
 uv run python scripts/seed_demo.py
 ```
-
-### Step 6: Start the API Server & Dashboard
-```bash
-uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-Open `http://localhost:8000/` or `http://localhost:8000/demo` in your browser.
+This populates 6 merchants, realistic transaction history, compressed memories, and a valid audit chain.
 
 ---
 
-## 5. API Endpoints Reference
-
-### AI Buying Agent & NLP
-- `POST /api/v1/agent/interpret`: Converts natural language purchase prompt into a structured payment intent.
-- `POST /api/v1/agent/evaluate`: End-to-end agentic purchase: interprets prompt, evaluates through DecisionVault, and executes gated payment on `ALLOW`.
-
-### Demo Seeder
-- `POST /api/v1/demo/seed`: Idempotently seeds standard demo principals, 30-day transaction history, baseline decision memories, and valid audit trail.
-
-### Decision Evaluation
-- `POST /api/v1/decisions/evaluate`: Evaluates a proposed financial action without executing payment. Returns `decision` (`ALLOW`, `ASK_USER`, `BLOCK`), `reason_code`, structured `rule_results`, and `memory_context` evidence.
-
-### Decision Memory Layer
-- `POST /api/v1/memories/build/{transaction_id}`: Converts a raw transaction into a canonical financial event, computes vector embedding, and persists decision memory with source provenance.
-- `POST /api/v1/memories/compress`: Deterministically compresses redundant routine transactions into consolidated decision memories with full provenance.
-- `POST /api/v1/memories/search`: Retrieves candidate memories ranked by vector cosine similarity score (`SEMANTIC`) or tiered hybrid relevance (`HYBRID`).
-- `GET /api/v1/memories?user_id=...`: Retrieves bounded decision memories ordered by relevance priority.
-
-### Payment Execution & Razorpay Test Mode Gate
-- `POST /api/v1/payments/execute`: Evaluates financial action against deterministic guardrails and executes payment via Razorpay Test Mode if `ALLOW`.
-- `POST /api/v1/payments/decisions/{decision_id}/confirm`: Processes explicit user confirmation for pending `ASK_USER` decisions.
-- `GET /api/v1/payments/status`: Returns Razorpay Test Mode gateway configuration and simulation mode status.
-
-### Audit & Evaluation Endpoints
-- `GET /api/v1/audit/verify`: Cryptographically validates the linear SHA-256 hash chain.
-- `GET /api/v1/audit?user_id=...`: Retrieves audit log records.
-- `POST /api/v1/evaluations/decision-preservation`: Runs comparative evaluation between full transaction history and compressed decision memory.
-
-### Interactive Buildathon Web Dashboard & Demo
-Start the server and open:
-```
-http://localhost:8000/
-```
-The demo UI provides:
-1. **Decision & Payment Console**: Propose actions, interact with AI Buying Agent, observe real-time guardrail evaluations, and execute Razorpay Test Mode payments.
-2. **Memory & Provenance View**: Inspect raw PostgreSQL ledgers vs derived decision memories with source linking and trigger live compression.
-3. **Audit Chain Inspector**: Verify unbroken SHA-256 chain integrity in real-time.
-4. **Benchmark Runner**: Run standard and adversarial decision preservation suites.
-5. **1-Click Canonical Demo Launcher**: Execute all 8 canonical buildathon scenarios with a single click.
-
-### Live Automated Demonstration Script
+## Running Tests
 ```bash
-uv run python tests/manual/live_final_demo.py
+uv run pytest -v          # 199 tests, 0 failures
+uv run ruff check .       # 0 lint errors
+uv run ruff format --check .  # 0 format errors
 ```
+
+---
+
+## API Reference
+
+| Endpoint | What it does |
+|---|---|
+| `POST /api/v1/agent/evaluate` | Full pipeline: natural language → guardrails → gated Razorpay payment |
+| `POST /api/v1/agent/interpret` | Parse natural language into structured PaymentIntent only |
+| `POST /api/v1/decisions/evaluate` | Run guardrails on a structured payment proposal |
+| `POST /api/v1/payments/execute` | Execute payment via Razorpay Test Mode (ALLOW only) |
+| `POST /api/v1/payments/decisions/{id}/confirm` | Confirm or reject a pending ASK_USER decision |
+| `GET /api/v1/memories?user_id=...` | Retrieve compressed decision memories for a user |
+| `POST /api/v1/memories/compress` | Trigger memory compression on transaction history |
+| `GET /api/v1/audit/verify` | Cryptographically verify the full SHA-256 audit chain |
+| `POST /api/v1/demo/seed` | Seed fresh demo data (idempotent) |
+| `GET /api/v1/payments/status` | Razorpay gateway configuration status |
+
+Full interactive API docs: **http://localhost:8000/docs**
+
+---
+
+## Project Structure
+
+```
+app/
+├── api/v1/routes/       # FastAPI route handlers
+├── services/
+│   ├── agent/           # Gemini AI buying agent + intent parser
+│   ├── guardrails/      # 6 deterministic payment rules
+│   ├── memory/          # Memory compression + vector search
+│   ├── payment/         # Razorpay Test Mode client
+│   ├── audit/           # SHA-256 hash-chain audit log
+│   └── decision_service.py
+├── models/              # SQLAlchemy ORM models
+├── schemas/             # Pydantic request/response schemas
+└── static/              # Frontend dashboard (HTML/CSS/JS)
+scripts/
+└── seed_demo.py         # Demo data seeder
+migrations/              # Alembic database migrations
+tests/
+├── unit/                # Guardrail and service unit tests
+├── integration/         # Full API route integration tests
+└── manual/              # Live end-to-end demo scripts
+```
+
+---
+
+## Tech Stack
+
+- **Backend**: FastAPI, SQLAlchemy 2.0 (async), Alembic, Pydantic v2
+- **Database**: SQLite (dev) / PostgreSQL (prod) with vector support
+- **AI**: Google Gemini Flash (primary), deterministic semantic parser (fallback)
+- **Payments**: Razorpay Test Mode
+- **Testing**: pytest-asyncio, httpx, 199 tests
+- **Quality**: Ruff (lint + format), 0 errors
