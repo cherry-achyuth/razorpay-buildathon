@@ -1,0 +1,67 @@
+services:
+  # ============================================================================
+  # PostgreSQL Database Service
+  # ============================================================================
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: decisionvault-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-decisionvault}
+      POSTGRES_USER: ${POSTGRES_USER:-decisionvault}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-decisionvault_secret_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-decisionvault} -d ${POSTGRES_DB:-decisionvault}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - decisionvault-net
+
+  # ============================================================================
+  # DecisionVault FastAPI Application Service
+  # ============================================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: decisionvault-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PROJECT_NAME: ${PROJECT_NAME:-DecisionVault}
+      APP_ENV: ${APP_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      HOST: 0.0.0.0
+      PORT: 8000
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-decisionvault}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-decisionvault_secret_password}
+      POSTGRES_DB: ${POSTGRES_DB:-decisionvault}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-decisionvault}:${POSTGRES_PASSWORD:-decisionvault_secret_password}@db:5432/${POSTGRES_DB:-decisionvault}
+    ports:
+      - "${PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - decisionvault-net
+
+networks:
+  decisionvault-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local

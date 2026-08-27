@@ -1,0 +1,61 @@
+[project]
+name = "decisionvault"
+version = "0.1.0"
+description = "Decision-Preserving Financial Memory for Autonomous Agents"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "DecisionVault Engineering Team" }
+]
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.8.0",
+    "pydantic-settings>=2.4.0",
+    "sqlalchemy>=2.0.32",
+    "asyncpg>=0.29.0",
+    "psycopg[binary]>=3.2.1",
+    "alembic>=1.13.2",
+    "pgvector>=0.5.0",
+    "httpx>=0.28.1",
+    "aiosqlite>=0.22.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.27.0",
+    "aiosqlite>=0.20.0",
+    "ruff>=0.6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+]
+ignore = ["B008", "E501"]  # Allow Depends() in FastAPI signatures, ignore line-length for docstrings

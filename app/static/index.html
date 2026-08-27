@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DecisionVault — AI Financial Safety Guard for Autonomous Commerce</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="header">
+    <div class="logo-area">
+      <div class="logo-badge">DV</div>
+      <div class="title-area">
+        <h1>DecisionVault</h1>
+        <p>AI Financial Safety Guard for Autonomous Buying Agents</p>
+      </div>
+    </div>
+    <div class="header-status">
+      <button class="btn btn-primary" style="background:#6366f1;padding:0.4rem 0.9rem;font-size:0.85rem;" onclick="handleSeedDemo()">⚡ Seed Demo Data</button>
+      <span class="status-badge rzp" id="rzp-status-badge">Razorpay: Loading...</span>
+      <span class="status-badge audit" id="audit-status-badge">Audit Chain: Loading...</span>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" data-tab="console">⚡ Decision &amp; Payment Console</button>
+    <button class="tab-btn" data-tab="memory">🧠 Payment History &amp; Knowledge</button>
+    <button class="tab-btn" data-tab="audit">🛡️ Tamper-Evident Audit Chain</button>
+    <button class="tab-btn" data-tab="evaluation">📊 Decision Preservation Benchmarks</button>
+    <button class="tab-btn" data-tab="scenarios">🚀 Try These Scenarios</button>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="main-content">
+
+    <!-- Priority 8: Onboarding Banner -->
+    <div id="onboarding-banner" class="onboarding-banner">
+      <div class="onboarding-content">
+        <div class="onboarding-icon">👋</div>
+        <div class="onboarding-text">
+          <strong>New here?</strong> DecisionVault is an AI that checks your payments before they go through — like a smart financial safety guard. Try one of the clickable examples below to see it in action!
+        </div>
+      </div>
+      <button class="onboarding-close" onclick="dismissOnboarding()" title="Dismiss">✕</button>
+    </div>
+
+    <!-- Tab 1: Decision & Payment Console -->
+    <div id="tab-console" class="tab-panel active">
+
+      <!-- Priority 1: 3-step How It Works Section -->
+      <div class="how-it-works-bar">
+        <div class="step-item">
+          <span class="step-icon">🧠</span>
+          <div>
+            <strong>1. You type an instruction</strong>
+            <p>e.g. "Pay my usual Netflix subscription"</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-item">
+          <span class="step-icon">🔍</span>
+          <div>
+            <strong>2. AI checks your history</strong>
+            <p>Verifies usual baseline &amp; safety policies</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-item">
+          <span class="step-icon">✅</span>
+          <div>
+            <strong>3. Approves, asks, or blocks</strong>
+            <p>With a clear plain-English reason</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Buying Agent NLP Console -->
+      <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08)); border: 1px solid rgba(99, 102, 241, 0.3);">
+        <div class="card-header">
+          <span class="card-title">🤖 AI Buying Agent: Natural Language Purchase &amp; Comparison</span>
+          <span class="code-pill" style="background:rgba(99,102,241,0.2);color:#818cf8;">Autonomous Purchase &amp; Comparison Gate</span>
+        </div>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem;">
+          Type a conversational buying instruction, ask to compare services, or click an example. Supports any real-world merchant (Netflix, Prime, Spotify, Swiggy, etc.).
+        </p>
+        <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
+          <input type="text" id="agent-prompt" class="form-input" style="flex:1;" placeholder="e.g. 'Pay my usual Netflix subscription' or 'Compare Netflix vs Amazon Prime'" value="Pay my usual Netflix subscription">
+          <button class="btn btn-secondary" onclick="handleAgentInterpret()" title="Extract structured intent">🔍 Parse Intent</button>
+          <button class="btn btn-primary" onclick="handleAgentEvaluate()" style="background:#6366f1;">🤖 Run Agentic Purchase</button>
+        </div>
+
+        <!-- Priority 2: 5 Core Demo Scenarios -->
+        <div class="prompt-examples" style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.75rem;">
+          <div style="font-size:0.82rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">
+            🎯 Core Demo Scenarios (Click to Run):
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:0.5rem;">
+            <button type="button" class="example-chip" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;text-align:left;" onclick="fillAndRunPrompt('Pay my usual Netflix subscription')">
+              <div>
+                <strong>1. Usual Subscription</strong>
+                <div style="font-size:0.75rem;color:var(--text-secondary);">"Pay my usual Netflix subscription"</div>
+              </div>
+              <span class="chip-badge allow">✅ ALLOW (₹649)</span>
+            </button>
+            <button type="button" class="example-chip" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;text-align:left;" onclick="fillAndRunPrompt('Pay 1500 INR to Netflix')">
+              <div>
+                <strong>2. Price Drift Anomaly</strong>
+                <div style="font-size:0.75rem;color:var(--text-secondary);">"Pay 1500 INR to Netflix" (2.3× baseline)</div>
+              </div>
+              <span class="chip-badge ask">⚠️ ASK_USER</span>
+            </button>
+            <button type="button" class="example-chip" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;text-align:left;" onclick="fillAndRunPrompt('Order food from Swiggy Instamart')">
+              <div>
+                <strong>3. New Merchant Guard</strong>
+                <div style="font-size:0.75rem;color:var(--text-secondary);">"Order food from Swiggy Instamart"</div>
+              </div>
+              <span class="chip-badge ask">🆕 ASK_USER</span>
+            </button>
+            <button type="button" class="example-chip" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;text-align:left;" onclick="fillAndRunPrompt('Compare Netflix vs Amazon Prime for a year')">
+              <div>
+                <strong>4. Service Cost Comparison</strong>
+                <div style="font-size:0.75rem;color:var(--text-secondary);">"Compare Netflix vs Amazon Prime for a year"</div>
+              </div>
+              <span class="chip-badge" style="background:rgba(59,130,246,0.2);color:#93c5fd;border:1px solid rgba(59,130,246,0.4);">📊 TABLE</span>
+            </button>
+            <button type="button" class="example-chip" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;text-align:left;" onclick="fillAndRunPrompt('Pay 5000 INR to Unknown Shady Mart')">
+              <div>
+                <strong>5. Hard Cap &amp; Unverified</strong>
+                <div style="font-size:0.75rem;color:var(--text-secondary);">"Pay 5000 INR to Unknown Shady Mart"</div>
+              </div>
+              <span class="chip-badge block">🚫 BLOCK</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="agent-intent-preview" style="display:none;padding:0.75rem;background:rgba(0,0,0,0.3);border-radius:6px;font-size:0.85rem;border:1px solid rgba(255,255,255,0.08);margin-top:0.75rem;"></div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Form Side (Priority 4: Friendly Title) -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">⚡ Quick Test: Send a Payment Request</span>
+          </div>
+          <div id="empty-data-warning" style="display:none;background:rgba(239,68,68,0.12);border:1px solid #ef4444;color:#fca5a5;padding:0.75rem 1rem;border-radius:6px;margin-bottom:1rem;font-size:0.88rem;">
+            ⚠️ No data found. Click '⚡ Seed Demo Data' first to get started.
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="decision-user">User Account</label>
+            <select id="decision-user" class="form-select"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="decision-merchant">Merchant</label>
+            <select id="decision-merchant" class="form-select"></select>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;">
+            <div class="form-group">
+              <label class="form-label" for="decision-amount">Amount</label>
+              <input type="number" id="decision-amount" class="form-input" placeholder="Amount (e.g. 649.00)" step="0.01">
+              <div id="decision-amount-hint" style="display:none;font-size:0.8rem;color:#f59e0b;margin-top:0.25rem;"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="decision-currency">Currency</label>
+              <select id="decision-currency" class="form-select">
+                <option value="INR">INR (₹)</option>
+                <option value="USD">USD ($)</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.75rem;margin-top:1.5rem;">
+            <button id="btn-evaluate" class="btn btn-secondary" onclick="handleEvaluateDecision()" style="flex:1;">
+              ⚡ Check Safety
+            </button>
+            <button id="btn-pay" class="btn btn-primary" onclick="handleExecutePayment()" style="flex:1.5;">
+              💳 Execute via Razorpay Test Mode
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Side (Priority 3 & 7: Visual Identity + Narrative Summary + Collapsible Details) -->
+        <div id="decision-result-card" class="card" style="display:none;">
+          <div class="card-header">
+            <span class="card-title">🛡️ Decision &amp; Payment Result</span>
+            <button id="btn-confirm-action" class="btn btn-success" style="display:none;padding:0.35rem 0.75rem;font-size:0.8rem;" onclick="openConfirmModal()">
+              Review &amp; Authorize
+            </button>
+          </div>
+
+          <!-- Comparison Results Box -->
+          <div id="comparison-result-box" style="display:none;margin-bottom:1rem;"></div>
+
+          <!-- Informational Badge for Auto-Created Merchants -->
+          <div id="new-merchant-badge" style="display:none;margin-bottom:1rem;background:rgba(59,130,246,0.12);border:1px solid #3b82f6;color:#93c5fd;padding:0.75rem 1rem;border-radius:6px;font-size:0.85rem;line-height:1.4;"></div>
+
+          <!-- Decision Outcome Banner (Priority 3) -->
+          <div id="decision-banner" class="decision-banner ALLOW">
+            <span>✅ Approved — Payment will proceed</span>
+          </div>
+
+          <!-- Priority 7: Plain English "What Just Happened" Summary Card -->
+          <div id="narrative-summary-card" class="narrative-card">
+            <div class="narrative-badge">📝 What just happened</div>
+            <div id="narrative-summary-text" class="narrative-text"></div>
+          </div>
+
+          <!-- Payment Info Box -->
+          <div id="payment-info-box" class="card" style="background-color:rgba(0,0,0,0.3);border-color:rgba(255,255,255,0.1);display:none;margin-bottom:1rem;"></div>
+
+          <!-- Priority 7: Collapsible Technical Details -->
+          <div class="details-toggle-bar">
+            <button type="button" class="btn-toggle-details" onclick="toggleTechnicalDetails()">
+              <span id="details-toggle-icon">🔍</span> <span id="details-toggle-text">See Safety Rules &amp; Memory History →</span>
+            </button>
+          </div>
+
+          <div id="technical-details-section" style="display:none;">
+            <!-- Priority 4: Renamed headers -->
+            <h4 style="font-size:0.85rem;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.5rem;">🔍 Safety Rules Checked</h4>
+            <div id="decision-rules-list"></div>
+
+            <h4 style="font-size:0.85rem;color:var(--text-secondary);text-transform:uppercase;margin:1rem 0 0.5rem 0;">🧠 What I Remembered About Your Spending</h4>
+            <div id="decision-memory-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Memory View (Priority 4 Renamed) -->
+    <div id="tab-memory" class="tab-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <label class="form-label" for="memory-user" style="margin:0;">Select User Account:</label>
+          <select id="memory-user" class="form-select" style="width:250px;" onchange="loadMemoryView()"></select>
+        </div>
+        <button id="btn-compress" class="btn btn-primary" onclick="handleTriggerCompression()">
+          🔄 Trigger Memory Compression (4×)
+        </button>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📜 Recorded Transactions (Ledger)</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="raw-tx-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🧠 Summarized Spending Knowledge</span>
+          </div>
+          <div id="memories-list-box"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Audit View -->
+    <div id="tab-audit" class="tab-panel">
+      <div id="audit-verify-banner" class="decision-banner" style="margin-bottom:1.5rem;border:1px solid #10b981;background-color:rgba(16,185,129,0.15);color:#34d399;">
+        ✅ CRYPTOGRAPHIC HASH CHAIN INTEGRITY: VALID
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🛡️ Tamper-Evident Hash Chain Logs (SHA-256)</span>
+          <button class="btn btn-secondary" onclick="loadAuditView()">
+            🔄 Refresh Audit Stream
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Seq #</th>
+                <th>Event Type</th>
+                <th>Entity</th>
+                <th>Record Hash (SHA-256)</th>
+                <th>Previous Hash</th>
+                <th>Occurred At</th>
+              </tr>
+            </thead>
+            <tbody id="audit-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: Evaluation Benchmarks -->
+    <div id="tab-evaluation" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📊 Decision-Preservation Evaluation Framework</span>
+          <div style="display:flex;gap:0.75rem;align-items:center;">
+            <label class="form-label" for="eval-user" style="margin:0;">User:</label>
+            <select id="eval-user" class="form-select" style="width:200px;"></select>
+            <button id="btn-eval-standard" class="btn btn-secondary" onclick="handleRunEvaluation('STANDARD')">
+              Run Standard Suite
+            </button>
+            <button id="btn-eval-adversarial" class="btn btn-primary" onclick="handleRunEvaluation('ADVERSARIAL')">
+              Run Adversarial Suite
+            </button>
+          </div>
+        </div>
+
+        <div id="eval-results-container" style="display:none;">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">
+            <div class="metric-box">
+              <div class="metric-val" id="metric-preservation-rate">100.0%</div>
+              <div class="metric-label">Decision Preservation</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-val" id="metric-safety-rate">100.0%</div>
+              <div class="metric-label">Safety-Critical Preservation</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-val" id="metric-critical-recall">100.0%</div>
+              <div class="metric-label">Critical Memory Recall</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-val" id="metric-comp-ratio">5.5x</div>
+              <div class="metric-label">Compression Ratio</div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Scenario ID</th>
+                  <th>Category</th>
+                  <th>Full History Decision</th>
+                  <th>Compressed Memory Decision</th>
+                  <th>Match Status</th>
+                </tr>
+              </thead>
+              <tbody id="eval-trace-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 5: Priority 5 Rebranded Scenarios -->
+    <div id="tab-scenarios" class="tab-panel">
+      <h2 style="font-size:1.1rem;margin-bottom:0.4rem;color:var(--text-primary);">Try These Scenarios — See how DecisionVault handles different situations</h2>
+      <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.25rem;">Each scenario runs an end-to-end simulation proving deterministic guardrails, zero debits on block, and memory compression.</p>
+
+      <div class="scenario-grid">
+        <div class="scenario-card">
+          <div class="scenario-header">
+            <div class="scenario-title">1. Routine Payment</div>
+            <div class="scenario-desc"><strong>Expected: Instant Approval.</strong> Routine ₹25 bill matches historical pattern and stays within limit. Executes payment in Razorpay Test Mode.</div>
+          </div>
+          <button class="btn btn-primary" onclick="runDemoScenario(1)">🚀 Run Routine Payment</button>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-header">
+            <div class="scenario-title">2. Duplicate Request Attack</div>
+            <div class="scenario-desc"><strong>Expected: Blocked.</strong> An identical payment proposed within 300s window. Blocked immediately with zero money movement.</div>
+          </div>
+          <button class="btn btn-danger" onclick="runDemoScenario(2)">🚀 Run Duplicate Check</button>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-header">
+            <div class="scenario-title">3. Over Policy Limit</div>
+            <div class="scenario-desc"><strong>Expected: Blocked.</strong> Agent proposes ₹150 exceeding your ₹50 safety cap. Stopped for your financial protection.</div>
+          </div>
+          <button class="btn btn-danger" onclick="runDemoScenario(3)">🚀 Run Limit Breach</button>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-header">
+            <div class="scenario-title">4. Price Spike (+160%)</div>
+            <div class="scenario-desc"><strong>Expected: Needs Confirmation.</strong> Usual bill is ₹25, agent requests ₹65. Halted until you explicitly approve or cancel.</div>
+          </div>
+          <button class="btn btn-secondary" onclick="runDemoScenario(4)">🚀 Run Price Spike</button>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-header">
+            <div class="scenario-title">5. Memory Compression</div>
+            <div class="scenario-desc"><strong>Expected: 4× Storage Compaction.</strong> Summarizes 90 days of transactions into compact decision memory with source links intact.</div>
+          </div>
+          <button class="btn btn-secondary" onclick="runDemoScenario(5)">🚀 Test Memory Compression</button>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-header">
+            <div class="scenario-title">6. Audit Trail Verification</div>
+            <div class="scenario-desc"><strong>Expected: Valid Cryptographic Proof.</strong> Verifies the unbroken SHA-256 hash chain for all decisions, proving nothing was altered.</div>
+          </div>
+          <button class="btn btn-success" onclick="runDemoScenario(6)">🚀 Verify Audit Trail</button>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-header">
+            <div class="scenario-title">7. Safety Benchmark Suite</div>
+            <div class="scenario-desc"><strong>Expected: 100% Preservation.</strong> Compares decision accuracy between full raw history and compressed memory across adversarial tests.</div>
+          </div>
+          <button class="btn btn-primary" onclick="runDemoScenario(7)">🚀 Run Safety Benchmark</button>
+        </div>
+
+        <div class="scenario-card">
+          <div class="scenario-header">
+            <div class="scenario-title">8. Conversational AI Buying</div>
+            <div class="scenario-desc"><strong>Expected: Natural Language to Payment.</strong> Natural English instruction parsed and safely gated through DecisionVault.</div>
+          </div>
+          <button class="btn btn-primary" style="background:#6366f1;" onclick="runDemoScenario(8)">🤖 Run AI Assistant</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Priority 6: Clean ASK_USER Confirmation Modal with Specific Numbers -->
+  <div id="confirm-modal" class="modal-backdrop">
+    <div class="modal">
+      <h3 style="margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">⚠️ This payment looks different from your usual spending</h3>
+      <p id="confirm-modal-description" style="font-size:0.92rem;color:var(--text-primary);line-height:1.5;margin-bottom:1rem;">
+        Your usual <strong>Netflix</strong> payment is <strong>₹649.00</strong>. This request is for <strong>₹1,500.00</strong> — that's <strong>2.3× more than normal</strong>. Do you want to approve it anyway?
+      </p>
+      <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border-color);border-radius:6px;padding:0.75rem 1rem;margin-bottom:1.25rem;">
+        <label style="display:flex;align-items:center;gap:0.6rem;font-size:0.85rem;color:var(--text-primary);cursor:pointer;">
+          <input type="checkbox" id="accept-baseline-checkbox" style="width:16px;height:16px;cursor:pointer;">
+          <span><strong>Accept as new baseline price</strong> for future renewals (avoids asking again for this price)</span>
+        </label>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
+        <button class="btn btn-danger" onclick="submitConfirmation(false)">🚫 No, cancel it</button>
+        <button class="btn btn-success" onclick="submitConfirmation(true)">✅ Yes, approve this payment</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
