@@ -80,7 +80,9 @@ class Settings(BaseSettings):
         """Returns an async-compatible database connection URL."""
         if self.DATABASE_URL:
             url = self.DATABASE_URL
-            # Normalize standard postgresql:// to postgresql+asyncpg://
+            # Normalize legacy postgres:// and standard postgresql:// to postgresql+asyncpg://
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql://", 1)
             if url.startswith("postgresql://"):
                 return url.replace("postgresql://", "postgresql+asyncpg://", 1)
             return url
@@ -95,8 +97,12 @@ class Settings(BaseSettings):
         """Returns a sync-compatible database URL (for Alembic migrations)."""
         if self.DATABASE_URL:
             url = self.DATABASE_URL
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql://", 1)
             if url.startswith("postgresql+asyncpg://"):
                 return url.replace("postgresql+asyncpg://", "postgresql+psycopg://", 1)
+            if url.startswith("postgresql://"):
+                return url.replace("postgresql://", "postgresql+psycopg://", 1)
             if url.startswith("sqlite+aiosqlite://"):
                 return url.replace("sqlite+aiosqlite://", "sqlite://", 1)
             return url

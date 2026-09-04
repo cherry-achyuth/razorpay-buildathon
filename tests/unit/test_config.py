@@ -30,14 +30,22 @@ def test_async_database_url_normalization():
     expected = "postgresql+asyncpg://user:pass@dbhost:5432/testdb"
     assert settings.async_database_url == expected
 
+    # Legacy postgres:// format
+    legacy_settings = Settings(DATABASE_URL="postgres://user:pass@dbhost:5432/testdb")
+    assert legacy_settings.async_database_url == expected
+
 
 def test_sync_database_url_normalization():
-    """Verify asyncpg URL is converted to psycopg sync URL."""
+    """Verify asyncpg and standard URLs are converted to psycopg sync URL."""
     settings = Settings(
         DATABASE_URL="postgresql+asyncpg://user:pass@dbhost:5432/testdb"
     )
     expected = "postgresql+psycopg://user:pass@dbhost:5432/testdb"
     assert settings.sync_database_url == expected
+
+    # Legacy postgres:// format
+    legacy_settings = Settings(DATABASE_URL="postgres://user:pass@dbhost:5432/testdb")
+    assert legacy_settings.sync_database_url == expected
 
 
 def test_settings_caching():

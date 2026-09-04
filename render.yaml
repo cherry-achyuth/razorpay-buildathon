@@ -1,0 +1,54 @@
+services:
+  - type: web
+    name: decisionvault
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    dockerCommand: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+    startCommand: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: APP_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: DATABASE_URL
+        fromDatabase:
+          name: decisionvault-db
+          property: connectionString
+      - key: EMBEDDING_PROVIDER
+        value: deterministic
+      - key: EMBEDDING_MODEL
+        value: decisionvault-embed-v1
+      - key: PRICE_DRIFT_THRESHOLD_PERCENT
+        value: "25.0"
+      - key: PRICE_DRIFT_MIN_SAMPLES
+        value: "3"
+      - key: HISTORICAL_LOOKBACK_DAYS
+        value: "90"
+      - key: DUPLICATE_DETECTION_WINDOW_SECONDS
+        value: "300"
+      - key: MEMORY_COMPRESSION_LOOKBACK_DAYS
+        value: "90"
+      - key: MEMORY_COMPRESSION_MAX_SOURCE_EVENTS
+        value: "500"
+      - key: RAZORPAY_CURRENCY_DEFAULT
+        value: INR
+      - key: RAZORPAY_MOCK_FALLBACK
+        value: "true"
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+
+databases:
+  - name: decisionvault-db
+    databaseName: decisionvault
+    user: decisionvault
+    plan: free
