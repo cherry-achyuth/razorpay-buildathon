@@ -17,11 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install uv for fast, deterministic dependency resolution
 COPY --from=ghcr.io/astral-sh/uv:0.5.24 /uv /uvx /bin/
 
-# Copy dependency specifications
-COPY pyproject.toml .
+# Copy dependency specifications and package source for build
+COPY pyproject.toml README.md ./
+COPY app ./app
 
 # Install production dependencies into system environment
-RUN uv pip install --system --no-cache -e .
+RUN uv pip install --system --no-cache .
 
 # ==============================================================================
 # Final Runtime Stage
