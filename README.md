@@ -1,7 +1,14 @@
 # DecisionVault
 > **AI Financial Safety Guard for Autonomous Commerce**
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-decisionvault.onrender.com-success?style=for-the-badge&logo=render)](https://decisionvault.onrender.com)
+[![Build Status](https://img.shields.io/badge/Tests-199%20Passing-brightgreen?style=for-the-badge)](https://decisionvault.onrender.com/health)
+
 DecisionVault is a financial memory middleware that sits between autonomous AI buying agents and Razorpay payment execution. Before any payment runs, it reads the user's spending history, compresses it into smart memories, and runs deterministic safety rules. The AI never touches money directly — every payment is gated, explainable, and auditable.
+
+🌐 **Live Application URL**: [https://decisionvault.onrender.com](https://decisionvault.onrender.com)  
+📖 **Interactive API Documentation**: [https://decisionvault.onrender.com/docs](https://decisionvault.onrender.com/docs)  
+🏥 **Health Check Endpoint**: [https://decisionvault.onrender.com/health](https://decisionvault.onrender.com/health)
 
 Built for the **Razorpay AI Buildathon**.
 
@@ -135,7 +142,7 @@ uv run ruff format --check .  # 0 format errors
 | `POST /api/v1/demo/seed` | Seed fresh demo data (idempotent) |
 | `GET /api/v1/payments/status` | Razorpay gateway configuration status |
 
-Full interactive API docs: **http://localhost:8000/docs**
+Full interactive API docs: **[https://decisionvault.onrender.com/docs](https://decisionvault.onrender.com/docs)** (or `http://localhost:8000/docs` locally)
 
 ---
 
